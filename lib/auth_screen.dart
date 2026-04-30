@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dashboard_screen.dart';
+import 'main_screen.dart';
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -55,10 +56,8 @@ class _AuthScreenState extends State<AuthScreen> {
           SnackBar(content: Text(_isLogin ? 'Giriş Başarılı!' : 'Kayıt Başarılı!')),
         );
         
-        // YENİ EKLENEN YÖNLENDİRME KODU
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        );
+        Navigator.of(context).pushReplacement
+        (MaterialPageRoute(builder: (context) =>  MainScreen()));
       }
     } on AuthException catch (error) {
       if (mounted) {
