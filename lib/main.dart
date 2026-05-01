@@ -13,7 +13,11 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // 2. SUPABASE BAŞLATMA
-  await Supabase.initialize(url: 'SUPABASE_URL', anonKey: 'SUPABASE_ANON_KEY');
+  await Supabase.initialize(
+    url: 'https://gwkdypfpxftqqwimqodr.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3a2R5cGZweGZ0cXF3aW1xb2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjAxMzEsImV4cCI6MjA5MjUzNjEzMX0.hC7m4FQ40pyRSHdiy_uJT3HPkoQ8G0s-5j00ZutOFvk',
+  );
 
   runApp(const RobotoyApp());
 }

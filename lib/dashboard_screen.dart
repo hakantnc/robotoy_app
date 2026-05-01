@@ -63,7 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             'user_id': _userId,
             'push_token': token,
             'device_type': deviceType,
-          });
+          }, onConflict: 'user_id, push_token');
 
           debugPrint("✅ Token kaydedildi: $token");
 
@@ -194,6 +194,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (e) {
       setState(() => _cameraError = 'Kameraya bağlanılamadı.');
     }
+  }
+
+  // --- ROBOT KOMUT GÖNDERME FONKSİYONLARI ---
+  // --- ROBOT KOMUT GÖNDERME FONKSİYONLARI (AKILLI TOGGLE) ---
+  Future<void> _sendRobotCommand(
+    String targetCommand,
+    String currentCommand,
+  ) async {
+    if (_robotId == null) return;
+
+    // Eğer bastığımız buton zaten aktif olan komutsa, durdurmak için 'none' gönder
+    final commandToSend = (currentCommand == targetCommand)
+        ? 'none'
+        : targetCommand;
+
+    try {
+      await supabase
+          .from('robots')
+          .update({'current_command': commandToSend})
+          .eq('robot_id', _robotId!);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              commandToSend == 'none'
+                  ? 'Komut durduruldu 🛑'
+                  : 'Komut gönderildi: $targetCommand 🚀',
+            ),
+            backgroundColor: commandToSend == 'none'
+                ? Colors.orange
+                : Colors.green,
+            duration: const Duration(
+              seconds: 1,
+            ), // Üst üste basılınca ekranda beklemesin
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hata: Komut iletilemedi!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildControlButton(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      icon: Icon(icon, size: 20),
+      label: Text(
+        title,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+      ),
+      onPressed: onTap,
+    );
   }
 
   // --- EŞLEŞTİRME DİYALOGU ---
@@ -461,6 +532,79 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   : WebViewWidget(controller: _cameraController!),
             ),
 
+            const SizedBox(height: 24),
+
+            // --- YENİ: ROBOT KONTROLLERİ ---
+            const Text(
+              'Robot Kontrolleri',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+
+            StreamBuilder<List<Map<String, dynamic>>>(
+              stream: supabase
+                  .from('robots')
+                  .stream(primaryKey: ['robot_id'])
+                  .eq('robot_id', _robotId!),
+              builder: (context, snapshot) {
+                // Veritabanındaki güncel veriyi çekiyoruz
+                final robotData = snapshot.data?.isNotEmpty == true
+                    ? snapshot.data!.first
+                    : {};
+                final currentCommand = robotData['current_command'] ?? 'none';
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildControlButton(
+                      context,
+                      title: currentCommand == 'play_song'
+                          ? 'Durdur'
+                          : 'Şarkı Çal',
+                      icon: currentCommand == 'play_song'
+                          ? Icons.stop
+                          : Icons.music_note,
+                      color: currentCommand == 'play_song'
+                          ? Colors.redAccent
+                          : Colors.blue,
+                      onTap: () =>
+                          _sendRobotCommand('play_song', currentCommand),
+                    ),
+                    _buildControlButton(
+                      context,
+                      title: currentCommand == 'play_lullaby'
+                          ? 'Durdur'
+                          : 'Ninni Çal',
+                      icon: currentCommand == 'play_lullaby'
+                          ? Icons.stop
+                          : Icons.nightlight_round,
+                      color: currentCommand == 'play_lullaby'
+                          ? Colors.redAccent
+                          : Colors.indigo,
+                      onTap: () =>
+                          _sendRobotCommand('play_lullaby', currentCommand),
+                    ),
+                    _buildControlButton(
+                      context,
+                      title: currentCommand == 'dance' ? 'Durdur' : 'Dans Et',
+                      icon: currentCommand == 'dance'
+                          ? Icons.stop
+                          : Icons.directions_run,
+                      color: currentCommand == 'dance'
+                          ? Colors.redAccent
+                          : Colors.deepOrange,
+                      onTap: () => _sendRobotCommand('dance', currentCommand),
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // --- YENİ EKLENEN: AĞLAMA GEÇMİŞİ WIDGET'I ---
+            _buildCryingTimeline(),
+
             const SizedBox(height: 30),
           ],
         ),
@@ -524,7 +668,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         StreamBuilder<List<Map<String, dynamic>>>(
-          // Stream içinde sadece TEK FİLTRE (robot_id) kullanıyoruz [cite: 15, 23]
+          // Stream içinde sadece TEK FİLTRE (robot_id) kullanıyoruz
           stream: supabase
               .from('monitoring_events')
               .stream(primaryKey: ['id'])
@@ -562,8 +706,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final event = cryingEvents[index];
                 final data = event['data'] as Map<String, dynamic>;
                 final isStart =
-                    data['status'] ==
-                    'start'; // 'start' veya 'stop' kontrolü [cite: 18]
+                    data['status'] == 'start'; // 'start' veya 'stop' kontrolü
 
                 final DateTime time = DateTime.parse(
                   event['created_at'],
