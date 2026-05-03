@@ -5,6 +5,7 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'auth_screen.dart';
 import 'main_screen.dart';
 import 'dart:io' show Platform;
+import 'add_child_screen.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -371,6 +372,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      // === EKLENEN YENİ BUTON KODU BURASI ===
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddChildScreen()),
+          );
+        },
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.child_care),
+        label: const Text(
+          'Çocuk Ekle',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+      // =======================================
       appBar: AppBar(
         title: const Text('ROBOTOY Kontrol Paneli'),
         elevation: 0,
