@@ -31,6 +31,20 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 		<key>UISceneConfigurations</key>
+		<!-- ================================================== -->
+	<!-- BİZİM EKLEDİĞİMİZ YENİ CFBundleURLTypes (DEEP LINK) -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>io.supabase.robotoy</string>
+			</array>
+		</dict>
+	</array>
+	<!-- ================================================== -->
 		<dict>
 			<key>UIWindowSceneSessionRoleApplication</key>
 			<array>

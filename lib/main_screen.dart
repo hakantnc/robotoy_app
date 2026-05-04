@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dashboard_screen.dart'; // Mevcut anasayfamız
 import 'auth_screen.dart'; // Giriş ekranı
-import 'joystick_screen.dart'; 
+import 'joystick_screen.dart';
 import 'reports_screen.dart';
+import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -12,31 +13,19 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // Uygulama ilk açıldığında 0. sekme (Anasayfa) görünür
+  int _selectedIndex =
+      0; // Uygulama ilk açıldığında 0. sekme (Anasayfa) görünür
 
   // --- SEKME İÇERİKLERİ ---
   // Şimdilik boş olanlara geçici yer tutucular (Placeholder) koyduk
   final List<Widget> _pages = [
     const DashboardScreen(), // 0. Sekme: Senin yazdığın panel
-    
     // 1. Sekme: Raporlarım
     const ReportsScreen(), // Raporlar ekranını buraya ekliyoruz
-
     // 2. Sekme: Joystick
     const JoystickScreen(), // Joystick ekranını buraya ekliyoruz
-
     // 3. Sekme: Ayarlar
-    const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.settings, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('Ayarlar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87)),
-          Text('Profil ve robot ayarları...', style: TextStyle(color: Colors.grey)),
-        ],
-      ),
-    ),
+    const SettingsScreen(), // Ayarlar ekranını buraya ekliyoruz
   ];
 
   void _onItemTapped(int index) {
@@ -50,14 +39,12 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       // IndexedStack: Sayfaları arka planda uyutur ama öldürmez. (Kamera kopmaz!)
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      
+      body: IndexedStack(index: _selectedIndex, children: _pages),
+
       // --- ALT MENÜ (NAVBAR) TASARIMI ---
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, // 4 ikon olduğu için fixed yapmamız şart
+        type: BottomNavigationBarType
+            .fixed, // 4 ikon olduğu için fixed yapmamız şart
         backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

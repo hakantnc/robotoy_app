@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// FİREBASE KÜTÜPHANELERİ EKLENDİ
+// FİREBASE KÜTÜPHANELERİ
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'auth_screen.dart';
-import 'main_screen.dart';
+import 'auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,10 +13,8 @@ void main() async {
 
   // 2. SUPABASE BAŞLATMA
   await Supabase.initialize(
-    url:
-        'https://gwkdypfpxftqqwimqodr.supabase.co', // Supabase projenizin URL'si
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3a2R5cGZweGZ0cXF3aW1xb2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjAxMzEsImV4cCI6MjA5MjUzNjEzMX0.hC7m4FQ40pyRSHdiy_uJT3HPkoQ8G0s-5j00ZutOFvk', // Supabase projenizin anonim anahtarı
+    url: 'SUPABASE_URL', // Supabase URL'si
+    anonKey: 'SUPABASE_ANON_KEY', // Supabase Anon Key
   );
 
   runApp(const RobotoyApp());
@@ -28,13 +25,13 @@ class RobotoyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final session = Supabase.instance.client.auth.currentSession;
-
     return MaterialApp(
       title: 'ROBOTOY',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: session == null ? const AuthScreen() : MainScreen(),
+      // 🔥 KRİTİK DEĞİŞİKLİK: Uygulama her zaman Güvenlik Kapısı'ndan (AuthGate) başlar.
+      // İçeri alınıp alınmayacağına veya Dashboard'a atılıp atılmayacağına AuthGate karar verir.
+      home: const AuthGate(),
     );
   }
 }

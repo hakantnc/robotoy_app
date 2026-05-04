@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'saving_screen.dart';
+
 class AddChildScreen extends StatefulWidget {
   const AddChildScreen({super.key});
 
@@ -73,6 +75,7 @@ class _AddChildScreenState extends State<AddChildScreen> {
           content: Text('Lütfen tüm bilgileri doldurun!'),
           backgroundColor: Colors.red,
         ),
+        
       );
       return;
     }
@@ -129,7 +132,9 @@ class _AddChildScreenState extends State<AddChildScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // İşlem bitince ana ekrana dön
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const SavingScreen()),
+        );
       }
     } catch (e) {
       if (mounted) {

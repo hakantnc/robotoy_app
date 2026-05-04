@@ -6,7 +6,7 @@ import 'auth_screen.dart';
 import 'main_screen.dart';
 import 'dart:io' show Platform;
 import 'add_child_screen.dart';
-
+import 'settings_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -392,9 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         title: const Text('ROBOTOY Kontrol Paneli'),
         elevation: 0,
-        actions: [
-          IconButton(icon: const Icon(Icons.logout), onPressed: _signOut),
-        ],
+        actions: [],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

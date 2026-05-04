@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+---
+# Robotoy UI Kuralları
+
+## Tema
+- Renk paleti: pembe (#FFC5D3), lavanta (#C8B6E2), krem (#FFF8F0), beyaz (#FFFFFF)
+- Köşeler: hep yuvarlak (BorderRadius.circular(20) veya üzeri)
+- Font ağırlığı: w400 normal, w600 başlıklar
+- Animasyon: her geçişte FadeTransition + SlideTransition birlikte
+- Hiçbir çalışan logic/backend kodu değiştirilmez, sadece build() metodu güncellenir
+
+## Kurallar
+- Scaffold backgroundColor: Color(0xFFFFF8F0) (krem)
+- AppBar elevation: 0, backgroundColor: transparent
+- Butonlar: yuvarlak, gradient değil düz pastel renk, height: 56px
+- Input alanları: border yok, sadece hafif dolgu rengi (filled style)
+- Hiç CircularProgressIndicator.blue kullanma, özel animasyon ekle
