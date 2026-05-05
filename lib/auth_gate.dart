@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth_screen.dart'; // Kendi giriş ekranının dosya adı
 import 'main_screen.dart'; // Kendi ana ekranının dosya adı
+import 'theme_controller.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -109,10 +110,10 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     // Sistem kontrol yaparken ekranda tatlı bir yüklenme animasyonu göster
     if (_isChecking) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFFFF8F0),
+      return Scaffold(
+        backgroundColor: context.appCream,
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFFFFC5D3)),
+          child: CircularProgressIndicator(color: context.appPink),
         ),
       );
     }

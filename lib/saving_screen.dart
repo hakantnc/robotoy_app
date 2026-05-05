@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'main_screen.dart';
+import 'theme_controller.dart';
+import 'l10n/app_localizations.dart';
 
 class SavingScreen extends StatefulWidget {
   const SavingScreen({super.key});
@@ -14,12 +16,6 @@ class SavingScreen extends StatefulWidget {
 
 class _SavingScreenState extends State<SavingScreen>
     with TickerProviderStateMixin {
-  static const Color _pink = Color(0xFFFFC5D3);
-  static const Color _lavender = Color(0xFFC8B6E2);
-  static const Color _cream = Color(0xFFFFF8F0);
-  static const Color _white = Color(0xFFFFFFFF);
-  static const Color _textDark = Color(0xFF5B4B6E);
-
   Timer? _navigationTimer;
 
   late final AnimationController _entryController;
@@ -43,13 +39,12 @@ class _SavingScreenState extends State<SavingScreen>
       parent: _entryController,
       curve: Curves.easeOut,
     );
-    _slideAnimation =
-        Tween<Offset>(
-          begin: const Offset(0, 0.08),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: _entryController, curve: Curves.easeOutCubic),
-        );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _entryController, curve: Curves.easeOutCubic),
+    );
 
     _bounceController = AnimationController(
       vsync: this,
@@ -66,7 +61,7 @@ class _SavingScreenState extends State<SavingScreen>
 
     _entryController.forward();
 
-    _navigationTimer = Timer(const Duration(seconds: 15), _goToMainScreen);
+    _navigationTimer = Timer(const Duration(seconds: 30), _goToMainScreen);
   }
 
   void _goToMainScreen() {
@@ -106,19 +101,23 @@ class _SavingScreenState extends State<SavingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final pink = context.appPink;
+    final lavender = context.appLavender;
+    final textDark = context.appTextDark;
+
     return Scaffold(
-      backgroundColor: _cream,
+      backgroundColor: context.appCream,
       body: Stack(
         children: [
-          const Positioned(
+          Positioned(
             top: -80,
             right: -60,
-            child: _PastelBlob(size: 240, color: _pink),
+            child: _PastelBlob(size: 240, color: pink),
           ),
-          const Positioned(
+          Positioned(
             bottom: -100,
             left: -70,
-            child: _PastelBlob(size: 280, color: _lavender),
+            child: _PastelBlob(size: 280, color: lavender),
           ),
           SafeArea(
             child: FadeTransition(
@@ -139,36 +138,41 @@ class _SavingScreenState extends State<SavingScreen>
                               child: child,
                             );
                           },
-                          child: const _CuteRobot(),
+                          child: _CuteRobot(
+                            pink: pink,
+                            lavender: lavender,
+                            surface: context.appSurface,
+                            eyeColor: textDark,
+                          ),
                         ),
                         const SizedBox(height: 48),
-                        const Text(
-                          'Ayarlarınız kaydediliyor...',
+                        Text(
+                          AppLocalizations.of(context).saving_title,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w600,
-                            color: _textDark,
+                            color: textDark,
                             letterSpacing: 0.2,
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Robotoy küçük dostunu hazırlıyor,\nlütfen biraz bekle.',
+                          AppLocalizations.of(context).saving_subtitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: _textDark.withValues(alpha: 0.65),
+                            color: textDark.withValues(alpha: 0.65),
                             height: 1.5,
                           ),
                         ),
                         const SizedBox(height: 40),
                         _OrbitingDotsIndicator(
                           controller: _spinController,
-                          primary: _pink,
-                          secondary: _lavender,
-                          background: _white,
+                          primary: pink,
+                          secondary: lavender,
+                          background: context.appSurface,
                         ),
                       ],
                     ),
@@ -207,16 +211,21 @@ class _PastelBlob extends StatelessWidget {
 }
 
 class _CuteRobot extends StatelessWidget {
-  const _CuteRobot();
+  const _CuteRobot({
+    required this.pink,
+    required this.lavender,
+    required this.surface,
+    required this.eyeColor,
+  });
 
-  static const Color _pink = Color(0xFFFFC5D3);
-  static const Color _lavender = Color(0xFFC8B6E2);
-  static const Color _white = Color(0xFFFFFFFF);
-  static const Color _eye = Color(0xFF5B4B6E);
-  static const Color _cheek = Color(0xFFFFA8BD);
+  final Color pink;
+  final Color lavender;
+  final Color surface;
+  final Color eyeColor;
 
   @override
   Widget build(BuildContext context) {
+    final cheek = pink;
     return SizedBox(
       width: 220,
       height: 240,
@@ -229,7 +238,7 @@ class _CuteRobot extends StatelessWidget {
               width: 6,
               height: 28,
               decoration: BoxDecoration(
-                color: _lavender,
+                color: lavender,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -239,10 +248,7 @@ class _CuteRobot extends StatelessWidget {
             child: Container(
               width: 18,
               height: 18,
-              decoration: const BoxDecoration(
-                color: _pink,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: pink, shape: BoxShape.circle),
             ),
           ),
           Positioned(
@@ -251,16 +257,19 @@ class _CuteRobot extends StatelessWidget {
               width: 170,
               height: 150,
               decoration: BoxDecoration(
-                color: _white,
+                color: surface,
                 borderRadius: BorderRadius.circular(38),
                 boxShadow: [
                   BoxShadow(
-                    color: _lavender.withValues(alpha: 0.35),
+                    color: lavender.withValues(alpha: 0.35),
                     blurRadius: 24,
                     offset: const Offset(0, 12),
                   ),
                 ],
-                border: Border.all(color: _pink.withValues(alpha: 0.45), width: 2),
+                border: Border.all(
+                  color: pink.withValues(alpha: 0.45),
+                  width: 2,
+                ),
               ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 22, 18, 16),
@@ -269,16 +278,16 @@ class _CuteRobot extends StatelessWidget {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        _RobotEye(),
-                        _RobotEye(),
+                      children: [
+                        _RobotEye(eyeColor: eyeColor),
+                        _RobotEye(eyeColor: eyeColor),
                       ],
                     ),
                     Container(
                       width: 38,
                       height: 14,
                       decoration: BoxDecoration(
-                        color: _pink,
+                        color: pink,
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
@@ -294,7 +303,7 @@ class _CuteRobot extends StatelessWidget {
               width: 16,
               height: 16,
               decoration: BoxDecoration(
-                color: _cheek.withValues(alpha: 0.55),
+                color: cheek.withValues(alpha: 0.55),
                 shape: BoxShape.circle,
               ),
             ),
@@ -306,7 +315,7 @@ class _CuteRobot extends StatelessWidget {
               width: 16,
               height: 16,
               decoration: BoxDecoration(
-                color: _cheek.withValues(alpha: 0.55),
+                color: cheek.withValues(alpha: 0.55),
                 shape: BoxShape.circle,
               ),
             ),
@@ -317,7 +326,7 @@ class _CuteRobot extends StatelessWidget {
               width: 130,
               height: 60,
               decoration: BoxDecoration(
-                color: _lavender,
+                color: lavender,
                 borderRadius: BorderRadius.circular(28),
               ),
               child: Center(
@@ -325,7 +334,7 @@ class _CuteRobot extends StatelessWidget {
                   width: 60,
                   height: 22,
                   decoration: BoxDecoration(
-                    color: _white.withValues(alpha: 0.7),
+                    color: surface.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
@@ -339,7 +348,7 @@ class _CuteRobot extends StatelessWidget {
               width: 22,
               height: 70,
               decoration: BoxDecoration(
-                color: _pink,
+                color: pink,
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -351,7 +360,7 @@ class _CuteRobot extends StatelessWidget {
               width: 22,
               height: 70,
               decoration: BoxDecoration(
-                color: _pink,
+                color: pink,
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -363,17 +372,16 @@ class _CuteRobot extends StatelessWidget {
 }
 
 class _RobotEye extends StatelessWidget {
-  const _RobotEye();
+  const _RobotEye({required this.eyeColor});
+
+  final Color eyeColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 26,
       height: 26,
-      decoration: const BoxDecoration(
-        color: _CuteRobot._eye,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: eyeColor, shape: BoxShape.circle),
       child: Align(
         alignment: const Alignment(-0.4, -0.4),
         child: Container(
@@ -461,10 +469,7 @@ class _OrbitingDotsIndicator extends StatelessWidget {
             color: color,
             shape: BoxShape.circle,
             boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.45),
-                blurRadius: 8,
-              ),
+              BoxShadow(color: color.withValues(alpha: 0.45), blurRadius: 8),
             ],
           ),
         ),

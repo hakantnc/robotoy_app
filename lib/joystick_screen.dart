@@ -7,6 +7,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 
+import 'theme_controller.dart';
+import 'l10n/app_localizations.dart';
+
 class JoystickScreen extends StatefulWidget {
   const JoystickScreen({super.key});
 
@@ -20,10 +23,12 @@ class _JoystickScreenState extends State<JoystickScreen> {
 
   // --- KAMERA DEĞİŞKENLERİ ---
   WebViewController? _cameraController;
+  // ignore: unused_field
   bool _isCameraLoading = true;
   String _cameraError = '';
 
   // --- BLUETOOTH DEĞİŞKENLERİ ---
+  // ignore: unused_field
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
   List<BluetoothDevice> _devicesList = [];
   BluetoothDevice? _selectedDevice;
@@ -32,8 +37,8 @@ class _JoystickScreenState extends State<JoystickScreen> {
   bool get isConnected => (_connection?.isConnected ?? false);
 
   // Servo Açısı Değişkenleri
-  double _boyunAci = 90; 
-  double _kafaAci = 90;  
+  double _boyunAci = 90;
+  double _kafaAci = 90;
 
   @override
   void initState() {
@@ -49,14 +54,24 @@ class _JoystickScreenState extends State<JoystickScreen> {
     final user = supabase.auth.currentUser;
     if (user != null && user.email != null) {
       try {
-        final userData = await supabase.from('users').select('user_id').eq('email', user.email!).single();
-        final robotData = await supabase.from('user_robots').select('robot_id').eq('user_id', userData['user_id']).maybeSingle();
+        final userData = await supabase
+            .from('users')
+            .select('user_id')
+            .eq('email', user.email!)
+            .single();
+        final robotData = await supabase
+            .from('user_robots')
+            .select('robot_id')
+            .eq('user_id', userData['user_id'])
+            .maybeSingle();
 
         if (robotData != null) {
           _robotId = robotData['robot_id'];
           _initCamera();
         } else {
-          if (mounted) setState(() => _cameraError = 'Robot eşleşmesi bulunamadı.');
+          if (mounted) {
+            setState(() => _cameraError = 'Robot eşleşmesi bulunamadı.');
+          }
         }
       } catch (e) {
         if (mounted) setState(() => _cameraError = 'Veri çekilemedi.');
@@ -66,7 +81,11 @@ class _JoystickScreenState extends State<JoystickScreen> {
 
   Future<void> _initCamera() async {
     try {
-      final response = await supabase.from('robots').select('streaming_url').eq('robot_id', _robotId!).maybeSingle();
+      final response = await supabase
+          .from('robots')
+          .select('streaming_url')
+          .eq('robot_id', _robotId!)
+          .maybeSingle();
 
       if (response != null && response['streaming_url'] != null) {
         final streamUrl = response['streaming_url'];
@@ -76,7 +95,8 @@ class _JoystickScreenState extends State<JoystickScreen> {
           ..setBackgroundColor(Colors.black);
 
         if (controller.platform is AndroidWebViewController) {
-          (controller.platform as AndroidWebViewController).setMediaPlaybackRequiresUserGesture(false);
+          (controller.platform as AndroidWebViewController)
+              .setMediaPlaybackRequiresUserGesture(false);
         }
 
         await controller.loadRequest(Uri.parse(streamUrl));
@@ -96,12 +116,14 @@ class _JoystickScreenState extends State<JoystickScreen> {
   }
 
   // ==========================================
-  // 2. BLUETOOTH FONKSİYONLARI (Senin Kodların)
+  // 2. BLUETOOTH FONKSİYONLARI
   // ==========================================
   Future<void> _izinleriAlVeBaslat() async {
     await [
-      Permission.bluetooth, Permission.bluetoothConnect,
-      Permission.bluetoothScan, Permission.location,
+      Permission.bluetooth,
+      Permission.bluetoothConnect,
+      Permission.bluetoothScan,
+      Permission.location,
     ].request();
 
     FlutterBluetoothSerial.instance.state.then((state) {
@@ -109,7 +131,8 @@ class _JoystickScreenState extends State<JoystickScreen> {
     });
 
     try {
-      List<BluetoothDevice> pairedDevices = await FlutterBluetoothSerial.instance.getBondedDevices();
+      List<BluetoothDevice> pairedDevices =
+          await FlutterBluetoothSerial.instance.getBondedDevices();
       if (mounted) setState(() => _devicesList = pairedDevices);
     } catch (e) {
       debugPrint("Cihazlar alınamadı: $e");
@@ -121,9 +144,13 @@ class _JoystickScreenState extends State<JoystickScreen> {
     setState(() => isConnecting = true);
 
     try {
-      BluetoothConnection connection = await BluetoothConnection.toAddress(_selectedDevice!.address);
+      BluetoothConnection connection =
+          await BluetoothConnection.toAddress(_selectedDevice!.address);
       if (mounted) {
-        setState(() { _connection = connection; isConnecting = false; });
+        setState(() {
+          _connection = connection;
+          isConnecting = false;
+        });
       }
     } catch (e) {
       if (mounted) setState(() => isConnecting = false);
@@ -133,7 +160,8 @@ class _JoystickScreenState extends State<JoystickScreen> {
   void _komutGonder(String komut) {
     if (isConnected) {
       _connection!.output.add(Uint8List.fromList(utf8.encode(komut)));
-      _connection!.output.allSent.then((_) => debugPrint("Gönderilen: $komut"));
+      _connection!.output.allSent
+          .then((_) => debugPrint("Gönderilen: $komut"));
     }
   }
 
@@ -148,33 +176,73 @@ class _JoystickScreenState extends State<JoystickScreen> {
   // ==========================================
   @override
   Widget build(BuildContext context) {
+    final pink = context.appPink;
+    final lavender = context.appLavender;
+    final textDark = context.appTextDark;
+    final t = AppLocalizations.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: context.appCream,
       appBar: AppBar(
-        title: const Text('Manuel Sürüş (Bluetooth)', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        centerTitle: true,
+        title: Text(
+          t.joystick_title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            letterSpacing: 0.3,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [pink, lavender],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
           // --- 1. KAMERA ALANI ---
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
             child: Container(
               width: double.infinity,
-              height: 220, 
+              height: 220,
               decoration: BoxDecoration(
                 color: Colors.black,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: lavender.withValues(alpha: 0.25),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               clipBehavior: Clip.hardEdge,
               child: _cameraController == null
                   ? Center(
                       child: _cameraError.isNotEmpty
-                          ? Text(_cameraError, style: const TextStyle(color: Colors.redAccent))
-                          : const CircularProgressIndicator(color: Colors.white),
+                          ? Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Text(
+                                _cameraError,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            )
+                          : CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(pink),
+                              strokeWidth: 3,
+                            ),
                     )
                   : WebViewWidget(controller: _cameraController!),
             ),
@@ -182,54 +250,149 @@ class _JoystickScreenState extends State<JoystickScreen> {
 
           // --- 2. BLUETOOTH BAĞLANTI ÇUBUĞU ---
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: Colors.white,
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: context.appSurface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: lavender.withValues(alpha: 0.4)),
+            ),
             child: Row(
               children: [
                 Expanded(
-                  child: DropdownButton<BluetoothDevice>(
-                    isExpanded: true,
-                    hint: const Text('HC-06 Cihazı Seç'),
-                    value: _selectedDevice,
-                    items: _devicesList.map((device) => DropdownMenuItem(
-                      value: device, child: Text(device.name ?? "Bilinmeyen"),
-                    )).toList(),
-                    onChanged: (value) => setState(() => _selectedDevice = value),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<BluetoothDevice>(
+                      isExpanded: true,
+                      hint: Text(
+                        t.joystick_select_device,
+                        style: TextStyle(color: context.appMuted),
+                      ),
+                      value: _selectedDevice,
+                      items: _devicesList
+                          .map(
+                            (device) => DropdownMenuItem(
+                              value: device,
+                              child: Text(
+                                device.name ?? t.joystick_unknown_device,
+                                style: TextStyle(color: textDark),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedDevice = value),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: isConnected ? null : _baglan,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white),
-                  child: isConnecting 
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
-                      : Text(isConnected ? 'Bağlandı' : 'Bağlan'),
+                SizedBox(
+                  height: 44,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [pink, lavender],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: isConnected ? null : _baglan,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                      ),
+                      child: isConnecting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              isConnected
+                                  ? t.joystick_connected
+                                  : t.joystick_connect,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-          
-          // --- 3. KONTROLLER (JOYSTICK & SLIDER) ---
+
+          // --- 3. KONTROLLER ---
           Expanded(
-            child: isConnected 
-              ? SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      _kontrolButonuDuzen(), // D-Pad Motor Kontrolü
-                      const Divider(height: 40, thickness: 2),
-                      _servoKontrolDuzen(),  // Slider Servo Kontrolü
-                      const SizedBox(height: 20),
-                    ],
+            child: isConnected
+                ? SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      16,
+                      20,
+                      MediaQuery.of(context).padding.bottom + 72 + 16 + 16,
+                    ),
+                    child: Column(
+                      children: [
+                        _kontrolButonuDuzen(),
+                        const SizedBox(height: 24),
+                        Container(
+                          height: 1,
+                          color: context.appHairline,
+                        ),
+                        const SizedBox(height: 24),
+                        _servoKontrolDuzen(),
+                      ],
+                    ),
+                  )
+                : Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 96,
+                            height: 96,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [pink, lavender],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            child: const Icon(
+                              Icons.bluetooth_searching_rounded,
+                              color: Colors.white,
+                              size: 44,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            t.joystick_no_connection,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: context.appMuted,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                )
-              : const Center(
-                  child: Text(
-                    'Sürüşe başlamak için\nHC-06 modülüne bağlanın.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                  ),
-                ),
           ),
         ],
       ),
@@ -238,73 +401,150 @@ class _JoystickScreenState extends State<JoystickScreen> {
 
   // --- D-PAD WIDGET'LARI ---
   Widget _kontrolButonuDuzen() {
+    final t = AppLocalizations.of(context);
     return Column(
       children: [
-        _yonButonu('İLERİ', Icons.arrow_upward, 'F'),
+        _yonButonu(t.joystick_btn_forward, Icons.arrow_upward, 'F'),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _yonButonu('SOL', Icons.arrow_back, 'L'),
-            const SizedBox(width: 60), 
-            _yonButonu('SAĞ', Icons.arrow_forward, 'R'),
+            _yonButonu(t.joystick_btn_left, Icons.arrow_back, 'L'),
+            const SizedBox(width: 60),
+            _yonButonu(t.joystick_btn_right, Icons.arrow_forward, 'R'),
           ],
         ),
-        _yonButonu('GERİ', Icons.arrow_downward, 'B'),
+        _yonButonu(t.joystick_btn_back, Icons.arrow_downward, 'B'),
       ],
     );
   }
 
   Widget _yonButonu(String etiket, IconData ikon, String komut) {
+    final pink = context.appPink;
+    final lavender = context.appLavender;
+
     return GestureDetector(
       onTapDown: (_) => _komutGonder(komut),
-      onTapUp: (_) => _komutGonder('S'),     
-      onTapCancel: () => _komutGonder('S'),  
+      onTapUp: (_) => _komutGonder('S'),
+      onTapCancel: () => _komutGonder('S'),
       child: Container(
         margin: const EdgeInsets.all(8),
-        width: 75, height: 75,
+        width: 80,
+        height: 80,
         decoration: BoxDecoration(
-          color: Colors.blueAccent, 
+          gradient: LinearGradient(
+            colors: [pink, lavender],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           shape: BoxShape.circle,
-          boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: pink.withValues(alpha: 0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(ikon, color: Colors.white, size: 28),
-            Text(etiket, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+            Text(
+              etiket,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                letterSpacing: 0.3,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  // --- SLIDER WIDGET'LARI ---
   Widget _servoKontrolDuzen() {
+    final pink = context.appPink;
+    final lavender = context.appLavender;
+    final textDark = context.appTextDark;
+    final muted = context.appMuted;
+    final t = AppLocalizations.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
         children: [
-          const Text('Kamera Yönü (Servolar)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
-          const SizedBox(height: 10),
-          
-          Text('Boyun (Sağ - Sol): ${_boyunAci.toInt()}°'),
-          Slider(
-            value: _boyunAci,
-            min: 0, max: 180,
-            activeColor: Colors.green,
-            onChanged: (val) => setState(() => _boyunAci = val),
-            onChangeEnd: (val) => _komutGonder('X${val.toInt()}\n'),
+          Text(
+            t.joystick_servo_title,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: textDark,
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          Row(
+            children: [
+              Icon(Icons.swap_horiz_rounded, color: muted, size: 18),
+              const SizedBox(width: 6),
+              Text(
+                t.joystick_neck_label(_boyunAci.toInt()),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: muted,
+                ),
+              ),
+            ],
+          ),
+          SliderTheme(
+            data: SliderThemeData(
+              activeTrackColor: pink,
+              inactiveTrackColor: lavender.withValues(alpha: 0.3),
+              thumbColor: pink,
+              overlayColor: pink.withValues(alpha: 0.18),
+            ),
+            child: Slider(
+              value: _boyunAci,
+              min: 0,
+              max: 180,
+              onChanged: (val) => setState(() => _boyunAci = val),
+              onChangeEnd: (val) => _komutGonder('X${val.toInt()}\n'),
+            ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
-          Text('Kafa (Aşağı - Yukarı): ${_kafaAci.toInt()}°'),
-          Slider(
-            value: _kafaAci,
-            min: 0, max: 180,
-            activeColor: Colors.orange,
-            onChanged: (val) => setState(() => _kafaAci = val),
-            onChangeEnd: (val) => _komutGonder('Y${val.toInt()}\n'),
+          Row(
+            children: [
+              Icon(Icons.swap_vert_rounded, color: muted, size: 18),
+              const SizedBox(width: 6),
+              Text(
+                t.joystick_head_label(_kafaAci.toInt()),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: muted,
+                ),
+              ),
+            ],
+          ),
+          SliderTheme(
+            data: SliderThemeData(
+              activeTrackColor: lavender,
+              inactiveTrackColor: pink.withValues(alpha: 0.3),
+              thumbColor: lavender,
+              overlayColor: lavender.withValues(alpha: 0.18),
+            ),
+            child: Slider(
+              value: _kafaAci,
+              min: 0,
+              max: 180,
+              onChanged: (val) => setState(() => _kafaAci = val),
+              onChangeEnd: (val) => _komutGonder('Y${val.toInt()}\n'),
+            ),
           ),
         ],
       ),

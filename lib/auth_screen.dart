@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dashboard_screen.dart';
 import 'main_screen.dart';
+import 'theme_controller.dart';
+import 'l10n/app_localizations.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -123,10 +124,11 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const cream = Color(0xFFFFF8F0);
-    const pink = Color(0xFFFFC5D3);
-    const lavender = Color(0xFFC8B6E2);
-    const textPrimary = Color(0xFF4A3F55);
+    final cream = context.appCream;
+    final pink = context.appPink;
+    final lavender = context.appLavender;
+    final textPrimary = context.appTextDark;
+    final t = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: cream,
@@ -136,7 +138,7 @@ class _AuthScreenState extends State<AuthScreen> {
         foregroundColor: textPrimary,
         centerTitle: true,
         title: Text(
-          _isLogin ? 'Giriş Yap' : 'Kayıt Ol',
+          _isLogin ? t.auth_login : t.auth_register,
           style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -206,7 +208,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           child: Container(
                             width: 9,
                             height: 9,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: pink,
                               shape: BoxShape.circle,
                             ),
@@ -250,7 +252,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'ROBOTOY',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -262,9 +264,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _isLogin
-                      ? 'Tekrar hoş geldin'
-                      : 'Yeni bir maceraya başlayalım',
+                  _isLogin ? t.auth_welcome_back : t.auth_welcome_new,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -277,14 +277,14 @@ class _AuthScreenState extends State<AuthScreen> {
                 if (!_isLogin) ...[
                   _RoboInput(
                     controller: _firstNameController,
-                    hint: 'Ad',
+                    hint: t.auth_first_name_hint,
                     icon: Icons.person_rounded,
                     textCapitalization: TextCapitalization.words,
                   ),
                   const SizedBox(height: 14),
                   _RoboInput(
                     controller: _lastNameController,
-                    hint: 'Soyad',
+                    hint: t.auth_last_name_hint,
                     icon: Icons.person_outline_rounded,
                     textCapitalization: TextCapitalization.words,
                   ),
@@ -293,14 +293,14 @@ class _AuthScreenState extends State<AuthScreen> {
 
                 _RoboInput(
                   controller: _emailController,
-                  hint: 'E-posta',
+                  hint: t.auth_email_hint,
                   icon: Icons.mail_rounded,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 14),
                 _RoboInput(
                   controller: _passwordController,
-                  hint: 'Şifre',
+                  hint: t.auth_password_hint,
                   icon: Icons.lock_rounded,
                   obscureText: true,
                 ),
@@ -322,7 +322,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                           ),
                           child: Text(
-                            _isLogin ? 'Giriş Yap' : 'Kayıt Ol',
+                            _isLogin ? t.auth_login : t.auth_register,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -344,7 +344,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
-                        'veya',
+                        t.auth_or,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
@@ -378,9 +378,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     icon: const _GoogleLogo(size: 20),
-                    label: const Text(
-                      'Google ile devam et',
-                      style: TextStyle(
+                    label: Text(
+                      t.auth_google_continue,
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.2,
@@ -414,12 +414,12 @@ class _AuthScreenState extends State<AuthScreen> {
                       children: [
                         TextSpan(
                           text: _isLogin
-                              ? 'Hesabın yok mu?  '
-                              : 'Zaten hesabın var mı?  ',
+                              ? t.auth_no_account
+                              : t.auth_have_account,
                         ),
                         TextSpan(
-                          text: _isLogin ? 'Kayıt Ol' : 'Giriş Yap',
-                          style: const TextStyle(
+                          text: _isLogin ? t.auth_register : t.auth_login,
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: lavender,
                           ),
@@ -456,9 +456,10 @@ class _RoboInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const textPrimary = Color(0xFF4A3F55);
-    const pink = Color(0xFFFFC5D3);
-    const lavender = Color(0xFFC8B6E2);
+    final textPrimary = context.appTextDark;
+    final pink = context.appPink;
+    final lavender = context.appLavender;
+    final surface = context.appSurface;
 
     return TextField(
       controller: controller,
@@ -466,7 +467,7 @@ class _RoboInput extends StatelessWidget {
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,
       cursorColor: pink,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w400,
         color: textPrimary,
@@ -480,7 +481,7 @@ class _RoboInput extends StatelessWidget {
         ),
         prefixIcon: Icon(icon, color: lavender, size: 20),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 18,
@@ -495,7 +496,7 @@ class _RoboInput extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: pink, width: 1.5),
+          borderSide: BorderSide(color: pink, width: 1.5),
         ),
       ),
     );
@@ -566,8 +567,8 @@ class _RoboLoaderState extends State<_RoboLoader>
 
   @override
   Widget build(BuildContext context) {
-    const pink = Color(0xFFFFC5D3);
-    const lavender = Color(0xFFC8B6E2);
+    final pink = context.appPink;
+    final lavender = context.appLavender;
 
     return AnimatedBuilder(
       animation: _ctrl,
