@@ -131,8 +131,9 @@ class _JoystickScreenState extends State<JoystickScreen> {
     });
 
     try {
-      List<BluetoothDevice> pairedDevices =
-          await FlutterBluetoothSerial.instance.getBondedDevices();
+      List<BluetoothDevice> pairedDevices = await FlutterBluetoothSerial
+          .instance
+          .getBondedDevices();
       if (mounted) setState(() => _devicesList = pairedDevices);
     } catch (e) {
       debugPrint("Cihazlar alınamadı: $e");
@@ -144,8 +145,9 @@ class _JoystickScreenState extends State<JoystickScreen> {
     setState(() => isConnecting = true);
 
     try {
-      BluetoothConnection connection =
-          await BluetoothConnection.toAddress(_selectedDevice!.address);
+      BluetoothConnection connection = await BluetoothConnection.toAddress(
+        _selectedDevice!.address,
+      );
       if (mounted) {
         setState(() {
           _connection = connection;
@@ -160,8 +162,7 @@ class _JoystickScreenState extends State<JoystickScreen> {
   void _komutGonder(String komut) {
     if (isConnected) {
       _connection!.output.add(Uint8List.fromList(utf8.encode(komut)));
-      _connection!.output.allSent
-          .then((_) => debugPrint("Gönderilen: $komut"));
+      _connection!.output.allSent.then((_) => debugPrint("Gönderilen: $komut"));
     }
   }
 
@@ -239,8 +240,7 @@ class _JoystickScreenState extends State<JoystickScreen> {
                               ),
                             )
                           : CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(pink),
+                              valueColor: AlwaysStoppedAnimation<Color>(pink),
                               strokeWidth: 3,
                             ),
                     )
@@ -346,10 +346,7 @@ class _JoystickScreenState extends State<JoystickScreen> {
                       children: [
                         _kontrolButonuDuzen(),
                         const SizedBox(height: 24),
-                        Container(
-                          height: 1,
-                          color: context.appHairline,
-                        ),
+                        Container(height: 1, color: context.appHairline),
                         const SizedBox(height: 24),
                         _servoKontrolDuzen(),
                       ],
@@ -408,9 +405,15 @@ class _JoystickScreenState extends State<JoystickScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _yonButonu(t.joystick_btn_left, Icons.arrow_back, 'L'),
+            // GÖRÜNÜM: Sol ikon ve etiket
+            // İŞLEV: Robota 'R' komutunu göndererek donanımsal tersliği dengeler
+            _yonButonu(t.joystick_btn_left, Icons.arrow_back, 'R'),
+
             const SizedBox(width: 60),
-            _yonButonu(t.joystick_btn_right, Icons.arrow_forward, 'R'),
+
+            // GÖRÜNÜM: Sağ ikon ve etiket
+            // İŞLEV: Robota 'L' komutunu göndererek donanımsal tersliği dengeler
+            _yonButonu(t.joystick_btn_right, Icons.arrow_forward, 'L'),
           ],
         ),
         _yonButonu(t.joystick_btn_back, Icons.arrow_downward, 'B'),

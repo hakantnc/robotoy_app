@@ -16,8 +16,8 @@ void main() async {
 
   // 2. SUPABASE BAŞLATMA
   await Supabase.initialize(
-    url: String.fromEnvironment('SUPABASE_URL'), // Supabase URL'si
-    anonKey: String.fromEnvironment('SUPABASE_ANON_KEY'), // Supabase Anon Key
+    url: 'https://gwkdypfpxftqqwimqodr.supabase.co', // Supabase URL'si
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3a2R5cGZweGZ0cXF3aW1xb2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjAxMzEsImV4cCI6MjA5MjUzNjEzMX0.hC7m4FQ40pyRSHdiy_uJT3HPkoQ8G0s-5j00ZutOFvk' // Supabase Anon Key
   );
 
   // 3. KAYITLI TEMA + DİL TERCİHİNİ YÜKLE

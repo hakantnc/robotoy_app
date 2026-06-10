@@ -5,6 +5,7 @@ import 'auth_screen.dart';
 import 'theme_controller.dart';
 import 'locale_controller.dart';
 import 'l10n/app_localizations.dart';
+import 'widgets/editable_user_avatar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -668,6 +669,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final lastName = _userData?['last_name'] ?? '';
     final email = _userData?['email'] ?? '';
     final initial = (firstName.isNotEmpty ? firstName[0] : 'R').toUpperCase();
+    final userId = _userData?['user_id'] as int?;
 
     return Container(
       decoration: BoxDecoration(
@@ -699,28 +701,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [scheme.primary, scheme.secondary],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                    if (userId == null)
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [scheme.primary, scheme.secondary],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
                         ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          initial,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                        child: Center(
+                          child: Text(
+                            initial,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
+                      )
+                    else
+                      EditableUserAvatar(
+                        userId: userId,
+                        initial: initial,
+                        size: 60,
+                        gradientColors: [scheme.primary, scheme.secondary],
+                        onUpdated: (url) {
+                          setState(() {
+                            _userData = {...?_userData, 'avatar_url': url};
+                          });
+                        },
                       ),
-                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(

@@ -8,6 +8,8 @@ import 'add_child_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'theme_controller.dart';
 import 'l10n/app_localizations.dart';
+import 'widgets/walkie_talkie_button.dart';
+import 'widgets/editable_user_avatar.dart';
 
 // Sadece semantic (durum) renkleri sabit kalır — bunlar tema bağımsız.
 const Color _kStartRed = Color(0xFFFF8FA3);
@@ -519,6 +521,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _buildSectionTitle(t.dashboard_section_camera),
             const SizedBox(height: 12),
             _buildCameraView(),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: _kSurface,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: _kLavender.withOpacity(0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const WalkieTalkieButton(),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Konuşma butonu',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: _kDarkPurple,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Basılı tutarak ses kaydedin, bırakınca robota gönderilir.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: _kSoftPurple,
+                            height: 1.25,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 24),
 
@@ -710,16 +759,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-            child: Center(
-              child: Text(
-                _firstName.isNotEmpty ? _firstName[0].toUpperCase() : '?',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+            child: (_userId == null)
+                ? Center(
+                    child: Text(
+                      _firstName.isNotEmpty ? _firstName[0].toUpperCase() : '?',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                : EditableUserAvatar(
+                    userId: _userId!,
+                    initial:
+                        _firstName.isNotEmpty ? _firstName[0].toUpperCase() : '?',
+                    size: 54,
+                    gradientColors: [_kPink, _kLavender],
+                  ),
           ),
         ],
       ),

@@ -80,5 +80,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+<string>Robotoy ile konuşabilmeniz için mikrofon izni gereklidir.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Profil fotoğrafınızı seçebilmeniz için galeri erişimi gereklidir.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Profil fotoğrafınızı çekebilmeniz için kamera erişimi gereklidir.</string>
 </dict>
 </plist>
